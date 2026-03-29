@@ -16,7 +16,6 @@ A multi-game frontend project built using HTML, CSS, and JavaScript.
 - JavaScript
 
 ##  Live Demo
+https://game-hub-sumit.netlify.app/
 
-
-##  Screenshots
 
