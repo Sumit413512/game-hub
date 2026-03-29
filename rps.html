@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✊ Rock Paper Scissors — Game Hub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div id="game-rps" class="screen active">
+  <div class="game-header">
+    <button class="back-btn" onclick="location.href='index.html'">← BACK</button>
+    <span class="game-title-bar">✊ Rock Paper Scissors</span>
+  </div>
+  <div class="game-container">
+    <div class="rps-score">
+      <div class="score-box x">
+        <div class="label">YOU</div>
+        <div class="val" id="rps-p-score">0</div>
+      </div>
+      <div class="score-box">
+        <div class="label">DRAWS</div>
+        <div class="val" id="rps-d-score" style="color:var(--muted)">0</div>
+      </div>
+      <div class="score-box o">
+        <div class="label">CPU</div>
+        <div class="val" id="rps-c-score">0</div>
+      </div>
+    </div>
+
+    <div class="rps-arena">
+      <div class="rps-fighter">
+        <span class="rps-fighter-icon" id="rps-player-icon">❓</span>
+        <div class="rps-fighter-label">YOU</div>
+      </div>
+      <div class="rps-vs">VS</div>
+      <div class="rps-fighter">
+        <span class="rps-fighter-icon" id="rps-cpu-icon">❓</span>
+        <div class="rps-fighter-label">CPU</div>
+      </div>
+    </div>
+
+    <div class="rps-result" id="rps-result"></div>
+
+    <div class="rps-choices">
+      <button class="rps-btn" onclick="playRPS('rock')">✊<span class="label">ROCK</span></button>
+      <button class="rps-btn" onclick="playRPS('paper')">✋<span class="label">PAPER</span></button>
+      <button class="rps-btn" onclick="playRPS('scissors')">✌️<span class="label">SCISSORS</span></button>
+    </div>
+
+    <div class="btns-row">
+      <button class="game-btn secondary" onclick="resetRPS()">RESET</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-box">
+    <div class="win-emoji" id="win-emoji">🎉</div>
+    <div class="win-title" id="win-title">YOU WIN!</div>
+    <div class="win-msg"   id="win-msg">Congratulations!</div>
+    <div class="btns-row">
+      <button class="game-btn primary"   id="win-play-again">PLAY AGAIN</button>
+      <button class="game-btn secondary" onclick="closeWin()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<script src="utils.js"></script>
+<script>
+// ===== ROCK PAPER SCISSORS =====
+const rpsMap     = { rock: '✊', paper: '✋', scissors: '✌️' };
+const rpsChoices = ['rock', 'paper', 'scissors'];
+let rpsScores    = { p: 0, c: 0, d: 0 };
+
+function playRPS(player) {
+  const cpu = rpsChoices[Math.floor(Math.random() * 3)];
+  document.getElementById('rps-player-icon').textContent = rpsMap[player];
+  document.getElementById('rps-cpu-icon').textContent    = '🎲';
+
+  setTimeout(() => {
+    document.getElementById('rps-cpu-icon').textContent = rpsMap[cpu];
+    let result, msg;
+    if (player === cpu) {
+      result = 'draw'; msg = 'DRAW!'; rpsScores.d++;
+    } else if (
+      (player === 'rock'     && cpu === 'scissors') ||
+      (player === 'paper'    && cpu === 'rock')     ||
+      (player === 'scissors' && cpu === 'paper')
+    ) {
+      result = 'win'; msg = 'YOU WIN! 🎉'; rpsScores.p++;
+    } else {
+      result = 'lose'; msg = 'CPU WINS! 🤖'; rpsScores.c++;
+    }
+
+    const el = document.getElementById('rps-result');
+    el.textContent = msg;
+    el.className   = 'rps-result ' + result;
+
+    document.getElementById('rps-p-score').textContent = rpsScores.p;
+    document.getElementById('rps-c-score').textContent = rpsScores.c;
+    document.getElementById('rps-d-score').textContent = rpsScores.d;
+
+    if (rpsScores.p === 5)
+      setTimeout(() => showWin('🏆', '5 WINS!', 'You dominated the CPU!', resetRPS), 300);
+    if (rpsScores.c === 5)
+      setTimeout(() => { document.getElementById('rps-result').textContent = 'CPU got 5 wins! Try again?'; }, 300);
+  }, 400);
+}
+
+function resetRPS() {
+  rpsScores = { p: 0, c: 0, d: 0 };
+  document.getElementById('rps-p-score').textContent      = '0';
+  document.getElementById('rps-c-score').textContent      = '0';
+  document.getElementById('rps-d-score').textContent      = '0';
+  document.getElementById('rps-player-icon').textContent  = '❓';
+  document.getElementById('rps-cpu-icon').textContent     = '❓';
+  document.getElementById('rps-result').textContent       = '';
+}
+</script>
+</body>
+</html>

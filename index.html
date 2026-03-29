@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Game Hub — Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="screen active">
+  <div class="hero">
+    <h1 class="hero-title">GAME HUB</h1>
+    <div class="divider"></div>
+    <p class="hero-sub">Choose Your Game &bull; Enter the Arena</p>
+  </div>
+  <div class="orbit-ring"></div>
+  <div class="games-grid">
+
+    <div class="game-card" onclick="location.href='memory.html'">
+      <div class="card-glow"></div>
+      <span class="card-icon">🃏</span>
+      <div class="card-title">Memory Cards</div>
+      <div class="card-desc">Flip &amp; match pairs. Train your memory against the clock!</div>
+      <button class="play-btn">▶ PLAY</button>
+    </div>
+
+    <div class="game-card" onclick="location.href='tictactoe.html'">
+      <div class="card-glow"></div>
+      <span class="card-icon">✕⊙</span>
+      <div class="card-title">Tic Tac Toe</div>
+      <div class="card-desc">Classic 3×3 strategy. X vs O. Who will reign supreme?</div>
+      <button class="play-btn">▶ PLAY</button>
+    </div>
+
+    <div class="game-card" onclick="location.href='rps.html'">
+      <div class="card-glow"></div>
+      <span class="card-icon">✊</span>
+      <div class="card-title">Rock Paper Scissors</div>
+      <div class="card-desc">Best of 5 against the AI. Can you outguess the machine?</div>
+      <button class="play-btn">▶ PLAY</button>
+    </div>
+
+    <div class="game-card" onclick="location.href='numberguess.html'">
+      <div class="card-glow"></div>
+      <span class="card-icon">🔢</span>
+      <div class="card-title">Number Guess</div>
+      <div class="card-desc">1 to 100. Use clues to zero in on the secret number!</div>
+      <button class="play-btn">▶ PLAY</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- WIN OVERLAY (shared) -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-box">
+    <div class="win-emoji" id="win-emoji">🎉</div>
+    <div class="win-title" id="win-title">YOU WIN!</div>
+    <div class="win-msg"   id="win-msg">Congratulations!</div>
+    <div class="btns-row">
+      <button class="game-btn primary"    id="win-play-again">PLAY AGAIN</button>
+      <button class="game-btn secondary"  onclick="closeWin()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<script src="utils.js"></script>
+</body>
+</html>

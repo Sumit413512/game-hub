@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🃏 Memory Card Game — Game Hub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div id="game-memory" class="screen active">
+  <div class="game-header">
+    <button class="back-btn" onclick="location.href='index.html'">← BACK</button>
+    <span class="game-title-bar">🃏 Memory Card Game</span>
+  </div>
+  <div class="game-container">
+    <div class="memory-info">
+      <div class="memory-stat">
+        <div class="memory-stat-label">MOVES</div>
+        <div class="memory-stat-value" id="mem-moves">0</div>
+      </div>
+      <div class="memory-stat">
+        <div class="memory-stat-label">PAIRS</div>
+        <div class="memory-stat-value" id="mem-pairs">0/8</div>
+      </div>
+      <div class="memory-stat">
+        <div class="memory-stat-label">TIME</div>
+        <div class="memory-stat-value" id="mem-time">0s</div>
+      </div>
+    </div>
+    <div class="memory-grid" id="memory-grid"></div>
+    <div class="btns-row">
+      <button class="game-btn primary" onclick="initMemory()">NEW GAME</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-box">
+    <div class="win-emoji" id="win-emoji">🎉</div>
+    <div class="win-title" id="win-title">YOU WIN!</div>
+    <div class="win-msg"   id="win-msg">Congratulations!</div>
+    <div class="btns-row">
+      <button class="game-btn primary"   id="win-play-again">PLAY AGAIN</button>
+      <button class="game-btn secondary" onclick="closeWin()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<script src="utils.js"></script>
+<script>
+// ===== MEMORY CARD GAME =====
+const memEmojis = ['🐉','🦄','🔥','⚡','🌊','🎯','💎','🚀'];
+let memCards = [], memFlipped = [], memMatched = 0, memMoves = 0;
+let memTimer = null, memSeconds = 0, memLocked = false;
+
+function initMemory() {
+  clearMemoryTimer();
+  memCards   = [...memEmojis, ...memEmojis].sort(() => Math.random() - 0.5);
+  memFlipped = []; memMatched = 0; memMoves = 0; memSeconds = 0; memLocked = false;
+  document.getElementById('mem-moves').textContent = '0';
+  document.getElementById('mem-pairs').textContent = '0/8';
+  document.getElementById('mem-time').textContent  = '0s';
+  renderMemory();
+  memTimer = setInterval(() => {
+    memSeconds++;
+    document.getElementById('mem-time').textContent = memSeconds + 's';
+  }, 1000);
+}
+
+function clearMemoryTimer() {
+  if (memTimer) { clearInterval(memTimer); memTimer = null; }
+}
+
+function renderMemory() {
+  const grid = document.getElementById('memory-grid');
+  grid.innerHTML = '';
+  memCards.forEach((emoji, i) => {
+    const card = document.createElement('div');
+    card.className = 'mem-card';
+    card.dataset.index = i;
+    card.innerHTML = `<div class="mem-card-inner">
+      <div class="mem-card-front">?</div>
+      <div class="mem-card-back">${emoji}</div>
+    </div>`;
+    card.onclick = () => flipMemCard(i, card);
+    grid.appendChild(card);
+  });
+}
+
+function flipMemCard(i, card) {
+  if (memLocked || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  card.classList.add('flipped');
+  memFlipped.push({ i, card, emoji: memCards[i] });
+
+  if (memFlipped.length === 2) {
+    memMoves++;
+    document.getElementById('mem-moves').textContent = memMoves;
+    memLocked = true;
+    const [a, b] = memFlipped;
+    if (a.emoji === b.emoji) {
+      a.card.classList.add('matched');
+      b.card.classList.add('matched');
+      memMatched++;
+      document.getElementById('mem-pairs').textContent = memMatched + '/8';
+      memFlipped = [];
+      memLocked  = false;
+      if (memMatched === 8) {
+        clearMemoryTimer();
+        setTimeout(() => showWin('🏆', 'PERFECT MEMORY!',
+          `Completed in ${memMoves} moves & ${memSeconds}s!`, initMemory), 400);
+      }
+    } else {
+      a.card.classList.add('shake');
+      b.card.classList.add('shake');
+      setTimeout(() => {
+        a.card.classList.remove('flipped', 'shake');
+        b.card.classList.remove('flipped', 'shake');
+        memFlipped = [];
+        memLocked  = false;
+      }, 900);
+    }
+  }
+}
+
+// Auto-start
+initMemory();
+</script>
+</body>
+</html>

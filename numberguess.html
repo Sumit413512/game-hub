@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔢 Number Guess — Game Hub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div id="game-ng" class="screen active">
+  <div class="game-header">
+    <button class="back-btn" onclick="location.href='index.html'">← BACK</button>
+    <span class="game-title-bar">🔢 Number Guessing Game</span>
+  </div>
+  <div class="game-container">
+    <div class="ng-display">
+      <div class="ng-hint" id="ng-hint">I'm thinking of a number between 1 and 100...</div>
+      <div class="ng-thermometer">
+        <div class="ng-therm-fill" id="ng-therm" style="width:0%"></div>
+      </div>
+      <div class="ng-attempts" id="ng-attempts">ATTEMPTS: 0 / 10</div>
+    </div>
+
+    <div class="ng-input-row">
+      <input
+        class="ng-input"
+        id="ng-input"
+        type="number"
+        min="1" max="100"
+        placeholder="?"
+        onkeydown="if(event.key==='Enter') guessNumber()"
+      >
+      <button class="ng-submit" onclick="guessNumber()">GUESS</button>
+    </div>
+
+    <div class="ng-history" id="ng-history"></div>
+
+    <div class="btns-row">
+      <button class="game-btn primary" onclick="initNG()">NEW GAME</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-box">
+    <div class="win-emoji" id="win-emoji">🎉</div>
+    <div class="win-title" id="win-title">YOU WIN!</div>
+    <div class="win-msg"   id="win-msg">Congratulations!</div>
+    <div class="btns-row">
+      <button class="game-btn primary"   id="win-play-again">PLAY AGAIN</button>
+      <button class="game-btn secondary" onclick="closeWin()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<script src="utils.js"></script>
+<script>
+// ===== NUMBER GUESSING GAME =====
+let ngSecret, ngAttempts, ngDone;
+const ngMax = 10;
+
+function initNG() {
+  ngSecret   = Math.floor(Math.random() * 100) + 1;
+  ngAttempts = 0;
+  ngDone     = false;
+  document.getElementById('ng-hint').textContent     = "I'm thinking of a number between 1 and 100...";
+  document.getElementById('ng-attempts').textContent = `ATTEMPTS: 0 / ${ngMax}`;
+  document.getElementById('ng-history').innerHTML    = '';
+  document.getElementById('ng-therm').style.width    = '0%';
+  document.getElementById('ng-input').value          = '';
+  document.getElementById('ng-input').disabled       = false;
+  document.getElementById('ng-input').focus();
+}
+
+function guessNumber() {
+  if (ngDone) return;
+  const val = parseInt(document.getElementById('ng-input').value);
+  if (isNaN(val) || val < 1 || val > 100) {
+    document.getElementById('ng-hint').textContent = '⚠️ Enter a number between 1 and 100!';
+    return;
+  }
+  ngAttempts++;
+  document.getElementById('ng-attempts').textContent = `ATTEMPTS: ${ngAttempts} / ${ngMax}`;
+  document.getElementById('ng-input').value = '';
+
+  const diff   = Math.abs(val - ngSecret);
+  const warmth = Math.max(0, 100 - diff * 2);
+  document.getElementById('ng-therm').style.width = warmth + '%';
+
+  const badge = document.createElement('div');
+  badge.className = 'ng-guess-badge';
+
+  if (val === ngSecret) {
+    badge.className += ' correct';
+    badge.textContent = val + ' ✓';
+    ngDone = true;
+    document.getElementById('ng-input').disabled = true;
+    document.getElementById('ng-hint').textContent = `🎉 ${ngSecret} is correct! (${ngAttempts} attempts)`;
+    document.getElementById('ng-history').appendChild(badge);
+    setTimeout(() => showWin('🎯', 'BULLSEYE!', `Found ${ngSecret} in ${ngAttempts} attempts!`, initNG), 500);
+  } else {
+    const tooHigh = val > ngSecret;
+    badge.className += tooHigh ? ' high' : ' low';
+    badge.textContent = val + (tooHigh ? ' ↓' : ' ↑');
+
+    const emoji = diff < 5 ? '🔥' : diff < 15 ? '♨️' : diff < 30 ? '🌡️' : '🧊';
+    document.getElementById('ng-hint').textContent =
+      `${emoji} ${tooHigh ? 'Too HIGH! Go lower.' : 'Too LOW! Go higher.'}`;
+
+    if (ngAttempts >= ngMax) {
+      ngDone = true;
+      document.getElementById('ng-input').disabled = true;
+      document.getElementById('ng-hint').textContent = `😔 Out of attempts! It was ${ngSecret}.`;
+    }
+    document.getElementById('ng-history').appendChild(badge);
+  }
+}
+
+initNG();
+</script>
+</body>
+</html>

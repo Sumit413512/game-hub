@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✕⊙ Tic Tac Toe — Game Hub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div id="game-ttt" class="screen active">
+  <div class="game-header">
+    <button class="back-btn" onclick="location.href='index.html'">← BACK</button>
+    <span class="game-title-bar">✕⊙ Tic Tac Toe</span>
+  </div>
+  <div class="game-container">
+    <div class="ttt-score">
+      <div class="score-box x">
+        <div class="label">YOU (X)</div>
+        <div class="val" id="ttt-x-score">0</div>
+      </div>
+      <div class="score-box">
+        <div class="label">DRAWS</div>
+        <div class="val" id="ttt-d-score" style="color:var(--muted)">0</div>
+      </div>
+      <div class="score-box o">
+        <div class="label">CPU (O)</div>
+        <div class="val" id="ttt-o-score">0</div>
+      </div>
+    </div>
+    <div class="ttt-status" id="ttt-status">Your turn (X)</div>
+    <div class="ttt-board"  id="ttt-board"></div>
+    <div class="btns-row">
+      <button class="game-btn primary"   onclick="initTTT()">NEW GAME</button>
+      <button class="game-btn secondary" onclick="resetTTTScores()">RESET SCORES</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-box">
+    <div class="win-emoji" id="win-emoji">🎉</div>
+    <div class="win-title" id="win-title">YOU WIN!</div>
+    <div class="win-msg"   id="win-msg">Congratulations!</div>
+    <div class="btns-row">
+      <button class="game-btn primary"   id="win-play-again">PLAY AGAIN</button>
+      <button class="game-btn secondary" onclick="closeWin()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<script src="utils.js"></script>
+<script>
+// ===== TIC TAC TOE =====
+let tttBoard, tttTurn, tttGameOver;
+let tttScores = { X: 0, O: 0, D: 0 };
+const tttWins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+function initTTT() {
+  tttBoard    = Array(9).fill('');
+  tttTurn     = 'X';
+  tttGameOver = false;
+  document.getElementById('ttt-status').textContent = 'Your turn (X)';
+  renderTTT();
+}
+
+function renderTTT() {
+  const board = document.getElementById('ttt-board');
+  board.innerHTML = '';
+  tttBoard.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'ttt-cell' + (val ? ' taken ' + val.toLowerCase() : '');
+    cell.textContent = val;
+    cell.onclick = () => tttClick(i);
+    board.appendChild(cell);
+  });
+}
+
+function tttClick(i) {
+  if (tttBoard[i] || tttGameOver || tttTurn !== 'X') return;
+  tttBoard[i] = 'X';
+  const xWin = checkTTT('X');
+  if (!xWin && !tttBoard.every(Boolean)) {
+    tttTurn = 'O';
+    document.getElementById('ttt-status').textContent = 'CPU thinking...';
+    renderTTT();
+    setTimeout(cpuTTT, 500);
+  } else {
+    renderTTT();
+    if (!xWin) endTTT('D');
+  }
+}
+
+function cpuTTT() {
+  const move = getBestTTT();
+  tttBoard[move] = 'O';
+  renderTTT();
+  if (!checkTTT('O')) {
+    if (tttBoard.every(Boolean)) endTTT('D');
+    else { tttTurn = 'X'; document.getElementById('ttt-status').textContent = 'Your turn (X)'; }
+  }
+}
+
+function getBestTTT() {
+  // Win
+  for (const [a,b,c] of tttWins) {
+    const line = [tttBoard[a], tttBoard[b], tttBoard[c]];
+    if (line.filter(v => v === 'O').length === 2 && line.includes(''))
+      return [a,b,c][line.indexOf('')];
+  }
+  // Block
+  for (const [a,b,c] of tttWins) {
+    const line = [tttBoard[a], tttBoard[b], tttBoard[c]];
+    if (line.filter(v => v === 'X').length === 2 && line.includes(''))
+      return [a,b,c][line.indexOf('')];
+  }
+  if (!tttBoard[4]) return 4;
+  const corners = [0,2,6,8].filter(i => !tttBoard[i]);
+  if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+  const sides = [1,3,5,7].filter(i => !tttBoard[i]);
+  return sides[Math.floor(Math.random() * sides.length)];
+}
+
+function checkTTT(p) {
+  for (const combo of tttWins) {
+    if (combo.every(i => tttBoard[i] === p)) {
+      tttGameOver = true;
+      combo.forEach(i => document.getElementById('ttt-board').children[i].classList.add('winning'));
+      endTTT(p);
+      return true;
+    }
+  }
+  return false;
+}
+
+function endTTT(result) {
+  tttGameOver = true;
+  if (result === 'X') {
+    tttScores.X++;
+    document.getElementById('ttt-status').textContent = '🎉 You Win!';
+    document.getElementById('ttt-x-score').textContent = tttScores.X;
+    setTimeout(() => showWin('🏆', 'YOU WIN!', 'You outsmarted the CPU!', initTTT), 500);
+  } else if (result === 'O') {
+    tttScores.O++;
+    document.getElementById('ttt-status').textContent = '🤖 CPU Wins!';
+    document.getElementById('ttt-o-score').textContent = tttScores.O;
+  } else {
+    tttScores.D++;
+    document.getElementById('ttt-status').textContent = "🤝 It's a Draw!";
+    document.getElementById('ttt-d-score').textContent = tttScores.D;
+  }
+}
+
+function resetTTTScores() {
+  tttScores = { X: 0, O: 0, D: 0 };
+  document.getElementById('ttt-x-score').textContent = '0';
+  document.getElementById('ttt-o-score').textContent = '0';
+  document.getElementById('ttt-d-score').textContent = '0';
+  initTTT();
+}
+
+initTTT();
+</script>
+</body>
+</html>
